@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Upload XML</title>
+    <link rel="icon" href="data:," />
+    <style>
+      /* Your existing CSS styles */
+      body {
+        font-family: Arial, sans-serif;
+        background: #f5f6fa;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding-top: 40px;
+      }
+      h1 {
+        color: #333;
+        margin-bottom: 20px;
+      }
+      #upload-box {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        width: 320px;
+      }
+      #drop-area {
+        border: 2px dashed #aaa;
+        padding: 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: border-color 0.2s ease, background 0.2s ease;
+        min-height: 120px;
+      }
+      #drop-area.dragover {
+        border-color: #4caf50;
+        background: #f0fff4;
+      }
+      input[type="file"] {
+        margin-top: 15px;
+      }
+      button {
+        margin-top: 15px;
+        padding: 10px 20px;
+        background: #4caf50;
+        border: none;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      button:hover {
+        background: #45a049;
+      }
+      p {
+        color: #666;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Upload XML File</h1>
+
+    <div id="upload-box">
+      <div id="drop-area">
+        <p>Drag & Drop your XML file here</p>
+        <p>or select manually</p>
+        <form enctype="multipart/form-data" method="post">
+          <input type="file" name="xmlfile" accept=".xml" required />
+          <br />
+          <button type="submit">Upload</button>
+        </form>
+      </div>
+      <div><p>Login user: {{system_user}}</p></div>
+      <div><p>Ip Address: {{system_ip}}</p></div>
+    </div>
+
+    <script>
+      const dropArea = document.getElementById("drop-area");
+
+      dropArea.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dropArea.classList.add("dragover");
+      });
+
+      dropArea.addEventListener("dragleave", () => {
+        dropArea.classList.remove("dragover");
+      });
+
+      dropArea.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dropArea.classList.remove("dragover");
+
+        const file = e.dataTransfer.files[0];
+        if (file && file.name.toLowerCase().endsWith(".xml")) {
+          const formData = new FormData();
+          formData.append("xmlfile", file);
+
+          fetch("/", {
+            method: "POST",
+            body: formData,
+          })
+            .then((response) => {
+              if (response.redirected) {
+                window.location.href = response.url;
+              } else {
+                alert("Upload failed.");
+              }
+            })
+            .catch((err) => alert("Error: " + err));
+        } else {
+          alert("Only XML files are allowed.");
+        }
+      });
+    </script>
+  </body>
+</html>
